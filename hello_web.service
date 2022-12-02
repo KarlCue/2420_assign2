@@ -1,0 +1,16 @@
+[Unit]
+Description=Runs the node application for load balancer
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/home/karl/.volta/bin/node /home/karl/2420assign2/src/index.js
+User=karl
+Group=root
+Restart=always
+RestartSec=10
+TimeoutStopSec=90
+SyslogIdentifier=hello_web
+
+[Install]
+WantedBy=multi-user.target
