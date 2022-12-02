@@ -1,3 +1,5 @@
+http://24.199.71.23/
+
 # Creating Digital Ocean Infrastrucure
 ## Creating VPC
 
@@ -46,4 +48,87 @@
 1. Create a folder with ```mkdir html```
 2. cd into your folder
 3. Create a File with ```vim index.html```
-4. 
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+</head>
+<body>
+        <h1> Server 1 </h1>
+</body>
+</html>
+```
+4. Copy your file to /var/www ```sudo cp -r /html/index.html /var/www```
+
+##Create an SRC file
+1. Create a folder with ```mkdir src```
+2. cd into your folder
+3. Create a JS file with ```vim index.js```
+
+![jsfile](https://github.com/KarlCue/2420_assign2/blob/main/images/indexjs.jpg)
+
+4. Copy your file to /var/www ```sudo cp -r /src/index.js /var/www```
+
+## Install nodejs and fastify
+### Node
+1. ```curl -sL https://deb.nodesource.com/setup_lts.x | sudo -E bash - ```
+2. ```sudo apt-get install -y nodejs```
+### Fastify
+1. cd to your src folder
+2. ```npm init``` and ```npm i fastify``` inside the folder
+
+## Caddy File
+1. Edit your caddy file ```vim /etc/caddy/Caddyfile```
+2. Remove and replace the content 
+```
+http://<load balancer's IP address> {
+
+        root * /var/www/<load balancer's IP address'/html
+
+        file_server
+
+        reverse_proxy /api localhost:5050
+
+}
+```
+
+### Caddy Service
+1. Create your caddy service with ```vim /etc/systemd/system/caddy.service```
+
+![jsfile](https://github.com/KarlCue/2420_assign2/blob/main/images/caddyservice.jpg)
+
+3. ```sudo systemctl daemon-reload``` re runs all generators
+4. ```sudo systemctl start caddy.service``` to start the caddy service
+5. ```sudo chown caddy:caddy /var/www```
+
+### Install node and npm with Volta
+```curl https://get.volta.sh | bash
+source ~/.bashrc
+volta install node```
+
+### Node Service
+1. Create your hello_web.service with ```vim /etc/systemd/system/hello_web.service```
+
+```
+[Unit]
+Description=Runs the node application for load balancer
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/home/karl/.volta/bin/node /home/karl/2420assign2/src/index.js
+User=karl
+Group=root
+Restart=always
+RestartSec=10
+TimeoutStopSec=90
+SyslogIdentifier=hello_web
+
+[Install]
+WantedBy=multi-user.target
+```
+3. ```sudo systemctl enable caddy.service``
+4. ```sudo systemctl start caddy.service``
+
+
